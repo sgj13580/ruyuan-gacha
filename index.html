@@ -1,108 +1,84 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<script>
-!(function(j,a,g){j.__itrace_conf = {bid: 'f43basl8-6nqu7l3w',rel: '0.0.1', spa: true, uid: '', plugins:['jserror','interface','perf','resource','flow','blank']};var b = a.createElement("script");var d = a.getElementsByTagName("script")[0];b.type = "text/javascript";b.crossorigin = true;b.async = true;b.onload = function(){j.__itrace && j.__itrace.setReady()};d.parentNode.insertBefore(b,d);b.src = g})(window, document, "https://g.alicdn.com/woodpeckerx/itrace-next/itrace.iife.js")
-</script>
-
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>如鸢抽卡记录</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>如鸢密探抽卡</title>
 <style>
-/* SECTION: reset */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 16px; -webkit-tap-highlight-color: transparent; }
-body {
-  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  background: #FFF8F0;
-  color: #4A3728;
-  min-height: 100vh;
-  padding-bottom: env(safe-area-inset-bottom);
-  line-height: 1.5;
-}
-button { font-family: inherit; cursor: pointer; border: none; background: none; }
-input, select { font-family: inherit; font-size: 16px; }
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
+body{background:#1a1414;color:#f3e9d2;padding:20px}
+.container{max-width:900px;margin:0 auto}
+.title{text-align:center;font-size:26px;margin-bottom:20px;color:#d4b886}
+.pool-box{background:#282020;border:1px solid #6b4b37;border-radius:12px;padding:20px;margin-bottom:20px}
+.ctrl{display:flex;gap:12px;justify-content:center;margin:16px 0}
+button{background:#8c5e38;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:16px;cursor:pointer}
+button:hover{background:#a06c42}
+.result{margin-top:16px;min-height:120px;text-align:center;font-size:18px}
+.card-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:10px;margin-top:16px}
+.card{background:#332727;border-radius:8px;padding:8px;text-align:center}
+.card img{width:64px;height:64px;object-fit:cover;border-radius:6px}
+.card-name{margin-top:4px;font-size:13px}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="title">如鸢 · 密探卡池</div>
+  <div class="pool-box">
+    <div class="ctrl">
+      <button onclick="pull1()">单抽</button>
+      <button onclick="pull10()">十连</button>
+    </div>
+    <div class="result" id="res"></div>
+    <div class="card-grid" id="cardWrap"></div>
+  </div>
+</div>
 
-/* SECTION: theme variables */
-:root {
-  --bg: #FFF8F0;
-  --bg-card: #FFFDF7;
-  --bg-card-alt: #FFF5E6;
-  --gold: #C8A04E;
-  --gold-dark: #9B7530;
-  --gold-light: #F0DCA0;
-  --brown: #4A3728;
-  --brown-light: #7A6552;
-  --border: #E8D5B5;
-  --border-light: #F0E4D0;
-  --red: #C94040;
-  --red-bg: #FFF0F0;
-  --red-border: #E8A0A0;
-  --up-gold: #B8860B;
-  --up-gold-bg: #FFF8DC;
-  --shadow: rgba(160, 130, 80, 0.1);
-  --radius: 12px;
-}
+<script>
+// ==========【这里替换成你识别出来的96个密探名单】==========
+const agentList = [
+"密探1","密探2","密探3"
+// ……补齐96个，顺序和你图片识别顺序保持一致
+];
+// ==========【这里替换对应CDN头像链接，和名单一一对应】==========
+const avatarCDN = [
+"https://xxx/avatar1.jpg",
+"https://xxx/avatar2.jpg"
+];
 
-/* SECTION: header */
-.app-header {
-  background: linear-gradient(135deg, #F5E6C8, #EDD9B0);
-  padding: 16px 16px 12px;
-  text-align: center;
-  position: relative;
-  border-bottom: 2px solid var(--gold-light);
+function getRandomArr(arr, n){
+  let out=[];
+  for(let i=0;i<n;i++){
+    let r = Math.floor(Math.random()*arr.length);
+    out.push(arr[r])
+  }
+  return out
 }
-.app-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--gold-dark);
-  letter-spacing: 4px;
+function render(list){
+  const wrap = document.getElementById("cardWrap");
+  wrap.innerHTML=""
+  list.forEach((name,idx)=>{
+    let i = agentList.indexOf(name);
+    let imgSrc = avatarCDN[i] || "";
+    wrap.innerHTML += `
+    <div class="card">
+      <img src="${imgSrc}" alt="${name}">
+      <div class="card-name">${name}</div>
+    </div>`
+  })
 }
-.app-title::before { content: "\2726 "; font-size: 14px; }
-.app-title::after { content: " \2726"; font-size: 14px; }
-
-/* SECTION: main tabs */
-.main-tabs {
-  display: flex;
-  background: var(--bg-card);
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+function pull1(){
+  let ret = getRandomArr(agentList,1);
+  document.getElementById("res").innerText="单抽："+ret[0];
+  render(ret)
 }
-.main-tab {
-  flex: 1;
-  padding: 14px 0;
-  text-align: center;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--brown-light);
-  transition: all 0.2s;
-  position: relative;
+function pull10(){
+  let ret = getRandomArr(agentList,10);
+  document.getElementById("res").innerText="十连："+ret.join("、");
+  render(ret)
 }
-.main-tab.active {
-  color: var(--gold-dark);
-  background: var(--bg-card-alt);
-}
-.main-tab.active::after {
-  content: "";
-  position: absolute;
-  bottom: 0; left: 20%; right: 20%;
-  height: 3px;
-  background: var(--gold);
-  border-radius: 3px 3px 0 0;
-}
-
-/* SECTION: stats panel */
-.stats-panel {
-  margin: 12px;
-  padding: 14px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: 0 2px 8px var(--shadow);
-}
+</script>
+</body>
+</html>
 .stats-panel-title {
   font-size: 13px;
   font-weight: 600;
