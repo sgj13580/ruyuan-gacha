@@ -804,6 +804,87 @@ input, select { font-family: inherit; font-size: 16px; }
   color: #fff;
 }
 
+/* SECTION: trend chart */
+.trend-panel {
+  margin: 12px;
+  padding: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 2px 8px var(--shadow);
+}
+.trend-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.trend-tab {
+  flex: 1;
+  padding: 8px 0;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--brown-light);
+  background: var(--bg-card);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.trend-tab.active {
+  background: var(--gold);
+  color: #fff;
+}
+.trend-canvas-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 8px;
+}
+.trend-canvas-wrap canvas {
+  display: block;
+}
+.trend-empty {
+  text-align: center;
+  padding: 30px 10px;
+  color: var(--brown-light);
+  font-size: 13px;
+}
+.month-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.month-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  background: var(--bg);
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+  gap: 10px;
+}
+.month-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--brown);
+  min-width: 64px;
+}
+.month-count {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--gold-dark);
+  flex-shrink: 0;
+}
+.month-detail {
+  flex: 1;
+  font-size: 12px;
+  color: var(--brown-light);
+  text-align: right;
+}
+
 /* SECTION: hidden inputs */
 #importInput, #charImportInput, #avatarInput, #charEditAvatarInput { display: none; }
 
@@ -842,6 +923,16 @@ input, select { font-family: inherit; font-size: 16px; }
       <div class="stat-item"><div class="stat-label">平均出绝密</div><div class="stat-value" id="normalAvg">-</div></div>
     </div>
   </div>
+  <!-- SECTION: normal trend -->
+  <div class="trend-panel">
+    <div class="stats-panel-title">抽卡趋势</div>
+    <div class="trend-tabs">
+      <button class="trend-tab active" id="normalTrendTabChart" data-primary-action>趋势图</button>
+      <button class="trend-tab" id="normalTrendTabMonth">每月统计</button>
+    </div>
+    <div id="normalTrendChart"></div>
+    <div id="normalTrendMonth" style="display:none;"></div>
+  </div>
   <div class="record-section"><div class="record-list" id="normalList"></div></div>
 </div>
 
@@ -867,6 +958,16 @@ input, select { font-family: inherit; font-size: 16px; }
       <div class="stat-item"><div class="stat-label">UP角色总数</div><div class="stat-value" id="limUPPool">0</div></div>
       <div class="stat-item"><div class="stat-label">小保底不歪</div><div class="stat-value" id="limNoWaiPool">-</div></div>
     </div>
+  </div>
+  <!-- SECTION: limited trend -->
+  <div class="trend-panel">
+    <div class="stats-panel-title">抽卡趋势</div>
+    <div class="trend-tabs">
+      <button class="trend-tab active" id="limitedTrendTabChart" data-primary-action>趋势图</button>
+      <button class="trend-tab" id="limitedTrendTabMonth">每月统计</button>
+    </div>
+    <div id="limitedTrendChart"></div>
+    <div id="limitedTrendMonth" style="display:none;"></div>
   </div>
   <div class="record-section"><div class="record-list" id="limitedList"></div></div>
 </div>
@@ -1947,6 +2048,121 @@ function render() {
   } else {
     renderChars();
   }
+  renderTrend();
+}
+
+/* SECTION: trend chart */
+function formatMonthKey(ts) {
+  var d = new Date(ts);
+  var y = d.getFullYear();
+  var m = ('0' + (d.getMonth() + 1)).slice(-2);
+  return y + '-' + m;
+}
+function renderTrend() {
+  renderTrendForView('normal', state.normalRecords, false);
+  renderTrendForView('limited', state.limitedRecords, true);
+}
+function renderTrendForView(prefix, records, isLimited) {
+  var chartEl = document.getElementById(prefix + 'TrendChart');
+  var monthEl = document.getElementById(prefix + 'TrendMonth');
+  chartEl.innerHTML = '';
+  monthEl.innerHTML = '';
+  if (records.length === 0) {
+    var emptyDiv = document.createElement('div');
+    emptyDiv.className = 'trend-empty';
+    emptyDiv.textContent = '暂无记录，添加记录后可查看趋势';
+    chartEl.appendChild(emptyDiv);
+    return;
+  }
+  var sorted = records.slice().sort(function(a, b) { return a.time - b.time; });
+  var monthMap = {};
+  var monthOrder = [];
+  sorted.forEach(function(r) {
+    var mk = formatMonthKey(r.time);
+    if (!monthMap[mk]) { monthMap[mk] = { total: 0, up: 0, wai: 0 }; monthOrder.push(mk); }
+    monthMap[mk].total++;
+    if (isLimited && r.upStatus === 'yes') monthMap[mk].up++;
+    if (isLimited && r.upStatus === 'wai') monthMap[mk].wai++;
+  });
+  var months = monthOrder;
+  var maxVal = 0;
+  months.forEach(function(mk) { if (monthMap[mk].total > maxVal) maxVal = monthMap[mk].total; });
+  var barH = 28;
+  var topPad = 24;
+  var leftPad = 14;
+  var rightPad = 44;
+  var canvasH = topPad + months.length * barH + 10;
+  var wrapWidth = chartEl.offsetWidth || 300;
+  var canvasW = Math.max(wrapWidth, 200);
+  var canvas = document.createElement('canvas');
+  canvas.width = canvasW;
+  canvas.height = canvasH;
+  canvas.style.width = canvasW + 'px';
+  canvas.style.height = canvasH + 'px';
+  chartEl.appendChild(canvas);
+  var ctx = canvas.getContext('2d');
+  var chartW = canvasW - leftPad - rightPad;
+  var grad = ctx.createLinearGradient(leftPad, 0, leftPad + chartW, 0);
+  grad.addColorStop(0, '#C8A04E');
+  grad.addColorStop(1, '#F0DCA0');
+  months.forEach(function(mk, i) {
+    var val = monthMap[mk].total;
+    var y = topPad + i * barH;
+    var barWidth = maxVal > 0 ? (val / maxVal) * chartW : 0;
+    ctx.fillStyle = '#F0E4D0';
+    ctx.beginPath();
+    ctx.roundRect(leftPad, y + 4, chartW, barH - 8, 4);
+    ctx.fill();
+    if (barWidth > 0) {
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.roundRect(leftPad, y + 4, Math.max(barWidth, 6), barH - 8, 4);
+      ctx.fill();
+    }
+    ctx.fillStyle = '#7A6552';
+    ctx.font = '12px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(mk, leftPad, y + barH / 2);
+    ctx.fillStyle = '#9B7530';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(String(val), leftPad + chartW + 8, y + barH / 2);
+  });
+  months.slice().reverse().forEach(function(mk) {
+    var val = monthMap[mk].total;
+    var item = document.createElement('div');
+    item.className = 'month-item';
+    var label = document.createElement('div');
+    label.className = 'month-label';
+    label.textContent = mk;
+    var count = document.createElement('div');
+    count.className = 'month-count';
+    count.textContent = val + '抽';
+    item.appendChild(label);
+    item.appendChild(count);
+    if (isLimited) {
+      var detail = document.createElement('div');
+      detail.className = 'month-detail';
+      detail.textContent = 'UP: ' + monthMap[mk].up + '  歪: ' + monthMap[mk].wai;
+      item.appendChild(detail);
+    }
+    monthEl.appendChild(item);
+  });
+  var chartTab = document.getElementById(prefix + 'TrendTabChart');
+  var monthTab = document.getElementById(prefix + 'TrendTabMonth');
+  chartTab.addEventListener('click', function() {
+    chartTab.classList.add('active');
+    monthTab.classList.remove('active');
+    chartEl.style.display = '';
+    monthEl.style.display = 'none';
+  });
+  monthTab.addEventListener('click', function() {
+    monthTab.classList.add('active');
+    chartTab.classList.remove('active');
+    chartEl.style.display = 'none';
+    monthEl.style.display = '';
+  });
 }
 
 /* SECTION: init */
