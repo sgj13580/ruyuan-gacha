@@ -1299,12 +1299,10 @@ function updateNormalStats() {
   var ssr = recs.length;
   var total = recs.reduce(function(s, r) { return s + (r.pull || 0); }, 0);
   var avg = ssr > 0 ? (total / ssr).toFixed(1) : '-';
-  var sorted = recs.slice().sort(function(a, b) { return a.time - b.time; });
-  var lastPull = sorted.length > 0 ? sorted[sorted.length - 1].pull : 0;
-  var nextPity = Math.max(0, 40 - lastPull);
   document.getElementById('normalTotal').textContent = total;
   document.getElementById('normalSSR').textContent = ssr;
   document.getElementById('normalAvg').textContent = avg === '-' ? '-' : avg + '抽';
+  var nextPity = ssr > 0 ? 40 : 40;
   document.getElementById('normalNextPity').textContent = nextPity + '抽';
 }
 
@@ -1463,12 +1461,12 @@ function updateLimitedStats() {
   var ssrAll = allRecs.length;
   var totalAll = allRecs.reduce(function(s, r) { return s + (r.pull || 0); }, 0);
   var upAll = allRecs.filter(function(r) { return r.upStatus === 'yes'; }).length;
-  var waiAll = allRecs.filter(function(r) { return r.upStatus === 'wai'; }).length;
   var avgAll = ssrAll > 0 ? (totalAll / ssrAll).toFixed(1) : '-';
   var noWaiAll = ssrAll > 0 ? (upAll / ssrAll * 100).toFixed(1) + '%' : '-';
+  /* 小保底：每次出绝密即重置，固定40抽 */
+  var nextSmallAll = 40;
+  /* 大保底：80抽必出UP，从上次UP后重新累计 */
   var sortedAll = allRecs.slice().sort(function(a, b) { return a.time - b.time; });
-  var lastPullAll = sortedAll.length > 0 ? sortedAll[sortedAll.length - 1].pull : 0;
-  var nextSmallAll = Math.max(0, 40 - lastPullAll);
   var lastUPRec = null;
   for (var i = sortedAll.length - 1; i >= 0; i--) {
     if (sortedAll[i].upStatus === 'yes') { lastUPRec = sortedAll[i]; break; }
@@ -1501,9 +1499,10 @@ function updateLimitedStats() {
       var pUP = pRecs.filter(function(r) { return r.upStatus === 'yes'; }).length;
       var pAvg = pSSR > 0 ? (pTotal / pSSR).toFixed(1) : '-';
       var pNoWai = pSSR > 0 ? (pUP / pSSR * 100).toFixed(1) + '%' : '-';
+      /* 小保底重置 */
+      var pNextSmall = 40;
+      /* 大保底 */
       var pSorted = pRecs.slice().sort(function(a, b) { return a.time - b.time; });
-      var pLastPull = pSorted.length > 0 ? pSorted[pSorted.length - 1].pull : 0;
-      var pNextSmall = Math.max(0, 40 - pLastPull);
       var pLastUP = null;
       for (var k = pSorted.length - 1; k >= 0; k--) {
         if (pSorted[k].upStatus === 'yes') { pLastUP = pSorted[k]; break; }
