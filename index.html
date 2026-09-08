@@ -918,9 +918,10 @@ input, select { font-family: inherit; font-size: 16px; }
   <div class="stats-panel">
     <div class="stats-panel-title">普池统计</div>
     <div class="stats-grid">
-      <div class="stat-item"><div class="stat-label">总次数</div><div class="stat-value" id="normalTotal">0</div></div>
+      <div class="stat-item"><div class="stat-label">总抽数</div><div class="stat-value" id="normalTotal">0</div></div>
       <div class="stat-item"><div class="stat-label">总绝密数</div><div class="stat-value" id="normalSSR">0</div></div>
       <div class="stat-item"><div class="stat-label">平均出绝密</div><div class="stat-value" id="normalAvg">-</div></div>
+      <div class="stat-item"><div class="stat-label">距下次小保底</div><div class="stat-value" id="normalNextPity">40</div></div>
     </div>
   </div>
   <!-- SECTION: normal trend -->
@@ -942,21 +943,25 @@ input, select { font-family: inherit; font-size: 16px; }
   <div class="stats-panel">
     <div class="stats-panel-title">限定池总统计</div>
     <div class="stats-grid">
-      <div class="stat-item"><div class="stat-label">总次数</div><div class="stat-value" id="limTotalAll">0</div></div>
+      <div class="stat-item"><div class="stat-label">总抽数</div><div class="stat-value" id="limTotalAll">0</div></div>
       <div class="stat-item"><div class="stat-label">总绝密数</div><div class="stat-value" id="limSSRAll">0</div></div>
       <div class="stat-item"><div class="stat-label">平均出绝密</div><div class="stat-value" id="limAvgAll">-</div></div>
       <div class="stat-item"><div class="stat-label">UP角色总数</div><div class="stat-value" id="limUPAll">0</div></div>
-      <div class="stat-item"><div class="stat-label">小保底不歪</div><div class="stat-value" id="limNoWaiAll">-</div></div>
+      <div class="stat-item"><div class="stat-label">小保底不歪率</div><div class="stat-value" id="limNoWaiAll">-</div></div>
+      <div class="stat-item"><div class="stat-label">距下次小保底</div><div class="stat-value" id="limNextSmallAll">40</div></div>
+      <div class="stat-item"><div class="stat-label">距下次大保底</div><div class="stat-value red" id="limNextBigAll">80</div></div>
     </div>
   </div>
   <div class="stats-panel" id="limitedStatsPool" style="display:none;">
     <div class="stats-panel-title" id="poolStatsTitle">卡池统计</div>
     <div class="stats-grid">
-      <div class="stat-item"><div class="stat-label">总次数</div><div class="stat-value" id="limTotalPool">0</div></div>
+      <div class="stat-item"><div class="stat-label">总抽数</div><div class="stat-value" id="limTotalPool">0</div></div>
       <div class="stat-item"><div class="stat-label">总绝密数</div><div class="stat-value" id="limSSRPool">0</div></div>
       <div class="stat-item"><div class="stat-label">平均出绝密</div><div class="stat-value" id="limAvgPool">-</div></div>
       <div class="stat-item"><div class="stat-label">UP角色总数</div><div class="stat-value" id="limUPPool">0</div></div>
-      <div class="stat-item"><div class="stat-label">小保底不歪</div><div class="stat-value" id="limNoWaiPool">-</div></div>
+      <div class="stat-item"><div class="stat-label">小保底不歪率</div><div class="stat-value" id="limNoWaiPool">-</div></div>
+      <div class="stat-item"><div class="stat-label">距下次小保底</div><div class="stat-value" id="limNextSmallPool">40</div></div>
+      <div class="stat-item"><div class="stat-label">距下次大保底</div><div class="stat-value red" id="limNextBigPool">80</div></div>
     </div>
   </div>
   <!-- SECTION: limited trend -->
@@ -1291,12 +1296,16 @@ function renderNormal() {
 }
 function updateNormalStats() {
   var recs = state.normalRecords;
-  var total = recs.length;
   var ssr = recs.length;
+  var total = recs.reduce(function(s, r) { return s + (r.pull || 0); }, 0);
   var avg = ssr > 0 ? (total / ssr).toFixed(1) : '-';
+  var sorted = recs.slice().sort(function(a, b) { return a.time - b.time; });
+  var lastPull = sorted.length > 0 ? sorted[sorted.length - 1].pull : 0;
+  var nextPity = Math.max(0, 40 - lastPull);
   document.getElementById('normalTotal').textContent = total;
   document.getElementById('normalSSR').textContent = ssr;
   document.getElementById('normalAvg').textContent = avg === '-' ? '-' : avg + '抽';
+  document.getElementById('normalNextPity').textContent = nextPity + '抽';
 }
 
 /* SECTION: shared record card builder */
@@ -1451,16 +1460,35 @@ function renderLimitedRecords() {
 }
 function updateLimitedStats() {
   var allRecs = state.limitedRecords;
-  var totalAll = allRecs.length;
   var ssrAll = allRecs.length;
+  var totalAll = allRecs.reduce(function(s, r) { return s + (r.pull || 0); }, 0);
   var upAll = allRecs.filter(function(r) { return r.upStatus === 'yes'; }).length;
+  var waiAll = allRecs.filter(function(r) { return r.upStatus === 'wai'; }).length;
   var avgAll = ssrAll > 0 ? (totalAll / ssrAll).toFixed(1) : '-';
   var noWaiAll = ssrAll > 0 ? (upAll / ssrAll * 100).toFixed(1) + '%' : '-';
+  var sortedAll = allRecs.slice().sort(function(a, b) { return a.time - b.time; });
+  var lastPullAll = sortedAll.length > 0 ? sortedAll[sortedAll.length - 1].pull : 0;
+  var nextSmallAll = Math.max(0, 40 - lastPullAll);
+  var lastUPRec = null;
+  for (var i = sortedAll.length - 1; i >= 0; i--) {
+    if (sortedAll[i].upStatus === 'yes') { lastUPRec = sortedAll[i]; break; }
+  }
+  var pullsSinceUP = 0;
+  if (lastUPRec) {
+    for (var j = 0; j < sortedAll.length; j++) {
+      if (sortedAll[j].time > lastUPRec.time) pullsSinceUP += (sortedAll[j].pull || 0);
+    }
+  } else {
+    pullsSinceUP = totalAll;
+  }
+  var nextBigAll = Math.max(0, 80 - pullsSinceUP);
   document.getElementById('limTotalAll').textContent = totalAll;
   document.getElementById('limSSRAll').textContent = ssrAll;
   document.getElementById('limAvgAll').textContent = avgAll === '-' ? '-' : avgAll + '抽';
   document.getElementById('limUPAll').textContent = upAll;
   document.getElementById('limNoWaiAll').textContent = noWaiAll;
+  document.getElementById('limNextSmallAll').textContent = nextSmallAll + '抽';
+  document.getElementById('limNextBigAll').textContent = nextBigAll + '抽';
   var poolPanel = document.getElementById('limitedStatsPool');
   if (state.currentPool !== '__all__') {
     var pool = state.pools.find(function(p) { return p.id === state.currentPool; });
@@ -1468,16 +1496,34 @@ function updateLimitedStats() {
       poolPanel.style.display = '';
       document.getElementById('poolStatsTitle').textContent = pool.name + ' \u00B7 统计';
       var pRecs = allRecs.filter(function(r) { return r.poolId === state.currentPool; });
-      var pTotal = pRecs.length;
       var pSSR = pRecs.length;
+      var pTotal = pRecs.reduce(function(s, r) { return s + (r.pull || 0); }, 0);
       var pUP = pRecs.filter(function(r) { return r.upStatus === 'yes'; }).length;
       var pAvg = pSSR > 0 ? (pTotal / pSSR).toFixed(1) : '-';
       var pNoWai = pSSR > 0 ? (pUP / pSSR * 100).toFixed(1) + '%' : '-';
+      var pSorted = pRecs.slice().sort(function(a, b) { return a.time - b.time; });
+      var pLastPull = pSorted.length > 0 ? pSorted[pSorted.length - 1].pull : 0;
+      var pNextSmall = Math.max(0, 40 - pLastPull);
+      var pLastUP = null;
+      for (var k = pSorted.length - 1; k >= 0; k--) {
+        if (pSorted[k].upStatus === 'yes') { pLastUP = pSorted[k]; break; }
+      }
+      var pPullsSinceUP = 0;
+      if (pLastUP) {
+        for (var m = 0; m < pSorted.length; m++) {
+          if (pSorted[m].time > pLastUP.time) pPullsSinceUP += (pSorted[m].pull || 0);
+        }
+      } else {
+        pPullsSinceUP = pTotal;
+      }
+      var pNextBig = Math.max(0, 80 - pPullsSinceUP);
       document.getElementById('limTotalPool').textContent = pTotal;
       document.getElementById('limSSRPool').textContent = pSSR;
       document.getElementById('limAvgPool').textContent = pAvg === '-' ? '-' : pAvg + '抽';
       document.getElementById('limUPPool').textContent = pUP;
       document.getElementById('limNoWaiPool').textContent = pNoWai;
+      document.getElementById('limNextSmallPool').textContent = pNextSmall + '抽';
+      document.getElementById('limNextBigPool').textContent = pNextBig + '抽';
     } else {
       poolPanel.style.display = 'none';
     }
