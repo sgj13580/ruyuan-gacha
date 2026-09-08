@@ -804,6 +804,36 @@ input, select { font-family: inherit; font-size: 16px; }
   color: #fff;
 }
 
+/* SECTION: pity input */
+.pity-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.pity-input {
+  width: 48px;
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-card-alt);
+  color: var(--gold-dark);
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+  font-family: inherit;
+  -moz-appearance: textfield;
+}
+.pity-input::-webkit-inner-spin-button,
+.pity-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.pity-input:focus { border-color: var(--gold); }
+.pity-unit {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gold-dark);
+}
+.pity-input.red + .pity-unit { color: var(--red); }
+
 /* SECTION: trend chart */
 .trend-panel {
   margin: 12px;
@@ -921,7 +951,7 @@ input, select { font-family: inherit; font-size: 16px; }
       <div class="stat-item"><div class="stat-label">总抽数</div><div class="stat-value" id="normalTotal">0</div></div>
       <div class="stat-item"><div class="stat-label">总绝密数</div><div class="stat-value" id="normalSSR">0</div></div>
       <div class="stat-item"><div class="stat-label">平均出绝密</div><div class="stat-value" id="normalAvg">-</div></div>
-      <div class="stat-item"><div class="stat-label">距下次小保底</div><div class="stat-value" id="normalNextPity">40</div></div>
+      <div class="stat-item"><div class="stat-label">距下次小保底</div><div class="stat-value pity-input-wrap"><input class="pity-input" id="normalNextPity" type="number" inputmode="numeric" min="0" max="40" value="40"><span class="pity-unit">抽</span></div></div>
     </div>
   </div>
   <!-- SECTION: normal trend -->
@@ -948,8 +978,8 @@ input, select { font-family: inherit; font-size: 16px; }
       <div class="stat-item"><div class="stat-label">平均出绝密</div><div class="stat-value" id="limAvgAll">-</div></div>
       <div class="stat-item"><div class="stat-label">UP角色总数</div><div class="stat-value" id="limUPAll">0</div></div>
       <div class="stat-item"><div class="stat-label">小保底不歪率</div><div class="stat-value" id="limNoWaiAll">-</div></div>
-      <div class="stat-item"><div class="stat-label">距下次小保底</div><div class="stat-value" id="limNextSmallAll">40</div></div>
-      <div class="stat-item"><div class="stat-label">距下次大保底</div><div class="stat-value red" id="limNextBigAll">80</div></div>
+      <div class="stat-item"><div class="stat-label">距下次小保底</div><div class="stat-value pity-input-wrap"><input class="pity-input" id="limNextSmallAll" type="number" inputmode="numeric" min="0" max="40" value="40"><span class="pity-unit">抽</span></div></div>
+      <div class="stat-item"><div class="stat-label">距下次大保底</div><div class="stat-value pity-input-wrap"><input class="pity-input red" id="limNextBigAll" type="number" inputmode="numeric" min="0" max="80" value="80"><span class="pity-unit" style="color:var(--red);">抽</span></div></div>
     </div>
   </div>
   <div class="stats-panel" id="limitedStatsPool" style="display:none;">
@@ -960,8 +990,8 @@ input, select { font-family: inherit; font-size: 16px; }
       <div class="stat-item"><div class="stat-label">平均出绝密</div><div class="stat-value" id="limAvgPool">-</div></div>
       <div class="stat-item"><div class="stat-label">UP角色总数</div><div class="stat-value" id="limUPPool">0</div></div>
       <div class="stat-item"><div class="stat-label">小保底不歪率</div><div class="stat-value" id="limNoWaiPool">-</div></div>
-      <div class="stat-item"><div class="stat-label">距下次小保底</div><div class="stat-value" id="limNextSmallPool">40</div></div>
-      <div class="stat-item"><div class="stat-label">距下次大保底</div><div class="stat-value red" id="limNextBigPool">80</div></div>
+      <div class="stat-item"><div class="stat-label">距下次小保底</div><div class="stat-value pity-input-wrap"><input class="pity-input" id="limNextSmallPool" type="number" inputmode="numeric" min="0" max="40" value="40"><span class="pity-unit">抽</span></div></div>
+      <div class="stat-item"><div class="stat-label">距下次大保底</div><div class="stat-value pity-input-wrap"><input class="pity-input red" id="limNextBigPool" type="number" inputmode="numeric" min="0" max="80" value="80"><span class="pity-unit" style="color:var(--red);">抽</span></div></div>
     </div>
   </div>
   <!-- SECTION: limited trend -->
@@ -1172,7 +1202,10 @@ var state = {
   normalRecords: [],
   pools: [],
   limitedRecords: [],
-  characters: []
+  characters: [],
+  normalPity: 40,
+  limSmallPity: 40,
+  limBigPity: 80
 };
 
 /* SECTION: storage */
@@ -1193,6 +1226,9 @@ function loadState() {
       state.limitedRecords = parsed.limitedRecords || [];
       state.currentPool = parsed.currentPool || '__all__';
       state.characters = parsed.characters || [];
+      state.normalPity = (parsed.normalPity !== undefined) ? parsed.normalPity : 40;
+      state.limSmallPity = (parsed.limSmallPity !== undefined) ? parsed.limSmallPity : 40;
+      state.limBigPity = (parsed.limBigPity !== undefined) ? parsed.limBigPity : 80;
     }
     /* migrate v1 data */
     if (!raw) {
@@ -1302,8 +1338,7 @@ function updateNormalStats() {
   document.getElementById('normalTotal').textContent = total;
   document.getElementById('normalSSR').textContent = ssr;
   document.getElementById('normalAvg').textContent = avg === '-' ? '-' : avg + '抽';
-  var nextPity = ssr > 0 ? 40 : 40;
-  document.getElementById('normalNextPity').textContent = nextPity + '抽';
+  document.getElementById('normalNextPity').value = state.normalPity;
 }
 
 /* SECTION: shared record card builder */
@@ -1463,30 +1498,13 @@ function updateLimitedStats() {
   var upAll = allRecs.filter(function(r) { return r.upStatus === 'yes'; }).length;
   var avgAll = ssrAll > 0 ? (totalAll / ssrAll).toFixed(1) : '-';
   var noWaiAll = ssrAll > 0 ? (upAll / ssrAll * 100).toFixed(1) + '%' : '-';
-  /* 小保底：每次出绝密即重置，固定40抽 */
-  var nextSmallAll = 40;
-  /* 大保底：80抽必出UP，从上次UP后重新累计 */
-  var sortedAll = allRecs.slice().sort(function(a, b) { return a.time - b.time; });
-  var lastUPRec = null;
-  for (var i = sortedAll.length - 1; i >= 0; i--) {
-    if (sortedAll[i].upStatus === 'yes') { lastUPRec = sortedAll[i]; break; }
-  }
-  var pullsSinceUP = 0;
-  if (lastUPRec) {
-    for (var j = 0; j < sortedAll.length; j++) {
-      if (sortedAll[j].time > lastUPRec.time) pullsSinceUP += (sortedAll[j].pull || 0);
-    }
-  } else {
-    pullsSinceUP = totalAll;
-  }
-  var nextBigAll = Math.max(0, 80 - pullsSinceUP);
   document.getElementById('limTotalAll').textContent = totalAll;
   document.getElementById('limSSRAll').textContent = ssrAll;
   document.getElementById('limAvgAll').textContent = avgAll === '-' ? '-' : avgAll + '抽';
   document.getElementById('limUPAll').textContent = upAll;
   document.getElementById('limNoWaiAll').textContent = noWaiAll;
-  document.getElementById('limNextSmallAll').textContent = nextSmallAll + '抽';
-  document.getElementById('limNextBigAll').textContent = nextBigAll + '抽';
+  document.getElementById('limNextSmallAll').value = state.limSmallPity;
+  document.getElementById('limNextBigAll').value = state.limBigPity;
   var poolPanel = document.getElementById('limitedStatsPool');
   if (state.currentPool !== '__all__') {
     var pool = state.pools.find(function(p) { return p.id === state.currentPool; });
@@ -1499,30 +1517,13 @@ function updateLimitedStats() {
       var pUP = pRecs.filter(function(r) { return r.upStatus === 'yes'; }).length;
       var pAvg = pSSR > 0 ? (pTotal / pSSR).toFixed(1) : '-';
       var pNoWai = pSSR > 0 ? (pUP / pSSR * 100).toFixed(1) + '%' : '-';
-      /* 小保底重置 */
-      var pNextSmall = 40;
-      /* 大保底 */
-      var pSorted = pRecs.slice().sort(function(a, b) { return a.time - b.time; });
-      var pLastUP = null;
-      for (var k = pSorted.length - 1; k >= 0; k--) {
-        if (pSorted[k].upStatus === 'yes') { pLastUP = pSorted[k]; break; }
-      }
-      var pPullsSinceUP = 0;
-      if (pLastUP) {
-        for (var m = 0; m < pSorted.length; m++) {
-          if (pSorted[m].time > pLastUP.time) pPullsSinceUP += (pSorted[m].pull || 0);
-        }
-      } else {
-        pPullsSinceUP = pTotal;
-      }
-      var pNextBig = Math.max(0, 80 - pPullsSinceUP);
       document.getElementById('limTotalPool').textContent = pTotal;
       document.getElementById('limSSRPool').textContent = pSSR;
       document.getElementById('limAvgPool').textContent = pAvg === '-' ? '-' : pAvg + '抽';
       document.getElementById('limUPPool').textContent = pUP;
       document.getElementById('limNoWaiPool').textContent = pNoWai;
-      document.getElementById('limNextSmallPool').textContent = pNextSmall + '抽';
-      document.getElementById('limNextBigPool').textContent = pNextBig + '抽';
+      document.getElementById('limNextSmallPool').value = state.limSmallPity;
+      document.getElementById('limNextBigPool').value = state.limBigPity;
     } else {
       poolPanel.style.display = 'none';
     }
@@ -1948,6 +1949,9 @@ document.getElementById('importInput').addEventListener('change', function(e) {
         state.limitedRecords = imported.limitedRecords || [];
         state.currentPool = imported.currentPool || '__all__';
         state.characters = imported.characters || state.characters;
+        state.normalPity = (imported.normalPity !== undefined) ? imported.normalPity : 40;
+        state.limSmallPity = (imported.limSmallPity !== undefined) ? imported.limSmallPity : 40;
+        state.limBigPity = (imported.limBigPity !== undefined) ? imported.limBigPity : 80;
         saveState();
         render();
         showToast('数据导入成功');
@@ -2083,6 +2087,32 @@ document.querySelectorAll('.modal-overlay').forEach(function(overlay) {
     if (e.target === overlay) overlay.classList.remove('show');
   });
 });
+
+/* SECTION: pity input handlers */
+function bindPityInput(id, stateKey, max) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('input', function() {
+    var v = parseInt(el.value, 10);
+    if (isNaN(v) || v < 0) v = 0;
+    if (v > max) v = max;
+    state[stateKey] = v;
+    saveState();
+  });
+  el.addEventListener('blur', function() {
+    var v = parseInt(el.value, 10);
+    if (isNaN(v) || v < 0) v = 0;
+    if (v > max) v = max;
+    el.value = v;
+    state[stateKey] = v;
+    saveState();
+  });
+}
+bindPityInput('normalNextPity', 'normalPity', 40);
+bindPityInput('limNextSmallAll', 'limSmallPity', 40);
+bindPityInput('limNextBigAll', 'limBigPity', 80);
+bindPityInput('limNextSmallPool', 'limSmallPity', 40);
+bindPityInput('limNextBigPool', 'limBigPity', 80);
 
 /* SECTION: render all */
 function render() {
