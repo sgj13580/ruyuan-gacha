@@ -194,6 +194,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
 @media(max-width:480px){.fab{right:16px;}}
 
 .toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.75);color:#fff;padding:12px 24px;border-radius:10px;font-size:14px;z-index:200;}
+.pool-cover-img{width:100%;height:100%;object-fit:cover;display:block;}
+.rc-img img{width:100%;height:100%;object-fit:cover;display:block;}
 </style>
 </head>
 <body>
@@ -203,7 +205,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
 // ==================== 数据层 ====================
 const DB = {
   get(k, d){ try{ const v = JSON.parse(localStorage.getItem(k)); return v===null?d:v; }catch(e){ return d; } },
-  set(k, v){ localStorage.setItem(k, JSON.stringify(v)); }
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){ toast('保存失败：图片过大或存储空间不足'); } }
 };
 
 // 初始密探库（如鸢）
@@ -264,6 +266,52 @@ function getPoolRecords(pid){ const cid=state.currentIdentityId; return getRecor
 function getPool(pid){ return getPools().find(p=>p.id===pid); }
 
 function uid(){ return 'id_'+Date.now()+'_'+Math.random().toString(36).slice(2,7); }
+
+// ==================== 图片上传 ====================
+let tmpImgData = {};
+function compressImage(file, key, maxW){
+  const reader = new FileReader();
+  reader.onload = e=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const scale = Math.min(1, (maxW||420)/img.width);
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width*scale); c.height = Math.round(img.height*scale);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      tmpImgData[key] = c.toDataURL('image/jpeg', 0.82);
+      updateImgPreview(key);
+    };
+    img.onerror = ()=>toast('图片读取失败');
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function updateImgPreview(key){
+  const prev = document.getElementById('imgprev_'+key);
+  const url = tmpImgData[key];
+  if(prev){ prev.src = url||''; prev.style.display = url?'block':'none'; }
+  const rm = document.getElementById('imgrm_'+key);
+  if(rm) rm.style.display = url?'inline-block':'none';
+}
+function onPickImage(key, input, maxW){ if(input.files && input.files[0]) compressImage(input.files[0], key, maxW); }
+function clearTmpImg(key){ tmpImgData[key]=''; updateImgPreview(key); const f=document.getElementById('imgfile_'+key); if(f) f.value=''; }
+function imgPickerHtml(key, label, hint){
+  const cur = tmpImgData[key];
+  return `<div class="form-group"><label>${label}</label>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <img id="imgprev_${key}" src="${cur||''}" style="display:${cur?'block':'none'};width:66px;height:82px;object-fit:cover;border-radius:10px;border:1px solid #E0D5C0;background:#F5EFE2;">
+      <div>
+        <input type="file" id="imgfile_${key}" accept="image/*" style="display:none;" onchange="onPickImage('${key}',this)">
+        <button type="button" class="btn btn-outline" style="padding:8px 16px;font-size:13px;" onclick="document.getElementById('imgfile_${key}').click()">选择图片</button>
+        <span id="imgrm_${key}" style="display:${cur?'inline-block':'none'};margin-left:10px;color:#999;cursor:pointer;font-size:13px;" onclick="clearTmpImg('${key}')">移除图片</span>
+        <div style="font-size:11px;color:#aaa;margin-top:5px;">${hint||'选填，上传后自动压缩'}</div>
+      </div>
+    </div></div>`;
+}
+function recImgHtml(name, firstChar){
+  const c = getCards().find(x=>x.name===name);
+  return (c && c.img) ? `<div class="rc-img" style="padding:0;"><img src="${c.img}"></div>` : `<div class="rc-img">${firstChar}</div>`;
+}
 
 // ==================== 保底与统计 ====================
 const DB_VERSION = 'v23';
@@ -530,7 +578,7 @@ function renderPoolCard(p){
         <div class="record-card">
           <div class="rc-index">${seq}</div>
           ${lostTag}
-          <div class="rc-img">${firstChar}</div>
+          ${recImgHtml(r.topCardName, firstChar)}
           <div class="rc-name">${r.topCardName||'未知'}</div>
           <div class="rc-pulls">${r.pulls}</div>
         </div>`;
@@ -546,9 +594,10 @@ function renderPoolCard(p){
   return `
   <div class="pool-card ${isExpanded?'expanded':''}" onclick="togglePoolExpand('${p.id}')">
     <div class="pc-row">
+      ${p.img ? `<div class="pc-cover" style="width:110px;padding:0;"><img class="pool-cover-img" src="${p.img}"><div class="pc-name">${p.name}</div></div>` : `
       <div class="pc-cover" style="background:#1C1C1E;width:110px;display:flex;align-items:center;justify-content:center;padding:8px;">
         <div class="pc-name" style="background:transparent;color:#fff;font-size:40px;font-weight:900;padding:0;position:static;max-width:none;text-align:center;line-height:1.15;word-break:break-all;white-space:normal;overflow:visible;text-overflow:clip;">${p.name}</div>
-      </div>
+      </div>`}
       <div class="pc-info">
         <div class="pi-row">总次数 <b>${st.pulls}</b></div>
         <div class="pi-row">总绝密数 <b>${st.top}</b></div>
@@ -591,7 +640,7 @@ function renderPoolDetail(){
         ${delBtn}
         <div class="rc-index">${seq}</div>
         ${lostTag}
-        <div class="rc-img">${firstChar}</div>
+        ${recImgHtml(r.topCardName, firstChar)}
         <div class="rc-name">${r.topCardName||'未知'}</div>
         <div class="rc-pulls">${r.pulls}</div>
       </div>`;
@@ -618,9 +667,10 @@ function renderPoolDetail(){
     </div>
     <div class="pool-detail">
       <div class="pool-header">
+        ${p.img ? `<div class="ph-cover" style="width:120px;padding:0;"><img class="pool-cover-img" src="${p.img}"><div class="ph-name">${p.name}</div></div>` : `
         <div class="ph-cover" style="background:#1C1C1E;width:120px;display:flex;align-items:center;justify-content:center;padding:10px;">
           <div class="ph-name" style="position:static;background:transparent;color:#fff;font-size:42px;font-weight:900;padding:0;max-width:none;text-align:center;line-height:1.15;word-break:break-all;white-space:normal;overflow:visible;">${p.name}</div>
-        </div>
+        </div>`}
         <div class="ph-stats">
           <div class="ph-stat"><span class="ph-label">总次数</span><span class="ph-val">${st.pulls}</span></div>
           <div class="ph-stat"><span class="ph-label">总绝密数</span><span class="ph-val">${st.top}</span></div>
@@ -732,12 +782,15 @@ function renderManage(){
     <div class="manage-section">
       <h3>密探管理（${cards.length}）<span class="add" onclick="openModal('addCard')">+ 添加</span></h3>
       ${cards.map(c=>`
-        <div class="m-item">
+        <div class="m-item" onclick="editCard('${c.id}')" style="cursor:pointer;">
           <div>
             <div class="mi-name">${c.name}</div>
-            <div class="mi-meta">${c.rarity} · ${c.element||''} · ${c.profession||''}</div>
+            <div class="mi-meta">${c.rarity} · ${c.element||''} · ${c.profession||''}${c.img?' · 有图片':''}</div>
           </div>
-          <div class="mi-del" onclick="delCard('${c.id}')">删除</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span style="color:#D4A843;font-size:13px;">编辑</span>
+            <div class="mi-del" onclick="event.stopPropagation();delCard('${c.id}')">删除</div>
+          </div>
         </div>
       `).join('')}
     </div>
@@ -758,6 +811,7 @@ function renderModal(){
   else if(state.modal==='settings') body = modalSettings();
   else if(state.modal==='addPool'){ body = modalAddPool(); setTimeout(()=>resetPoolCardFilters(), 30); }
   else if(state.modal==='addCard') body = modalAddCard();
+  else if(state.modal==='editCard') body = modalEditCard();
   else if(state.modal==='addRecord'){ body = modalAddRecord(); setTimeout(()=>resetCardFilters(), 30); }
   else if(state.modal==='editPool'){ body = modalEditPool(); setTimeout(()=>resetPoolCardFilters(), 30); }
   mask.innerHTML = `<div class="modal" onclick="event.stopPropagation()">${body}</div>`;
@@ -787,6 +841,7 @@ function modalCreateIdentity(){
 function modalAddPool(){
   const id = getCurrentIdentity();
   const cards = getCards().filter(c=>c.game===id.game && c.rarity==='绝密');
+  tmpImgData['pool']='';
   return `
     <h3>添加卡池</h3>
     <div class="form-group"><label>卡池名称</label><input id="p_name" placeholder="如：珠渊玉水"></div>
@@ -818,6 +873,7 @@ function modalAddPool(){
         ${cards.map(c=>`<div class="card-chip top" data-id="${c.id}" data-elem="${c.element||''}" data-prof="${c.profession||''}" onclick="toggleChip(this)">${c.name}</div>`).join('')}
       </div>
     </div>
+    ${imgPickerHtml('pool','卡池封面','选填，不传则显示卡池名文字封面')}
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal()">取消</button>
       <button class="btn btn-gold" onclick="submitPool()">添加</button>
@@ -829,6 +885,7 @@ function modalEditPool(){
   const id = getCurrentIdentity();
   const cards = getCards().filter(c=>c.game===id.game && c.rarity==='绝密');
   const upIds = p.upCardIds||[];
+  tmpImgData['pool']=p.img||'';
   return `
     <h3>编辑卡池</h3>
     <div class="form-group"><label>卡池名称</label><input id="p_name" value="${p.name}"></div>
@@ -860,6 +917,7 @@ function modalEditPool(){
         ${cards.map(c=>`<div class="card-chip top ${upIds.includes(c.id)?'selected':''}" data-id="${c.id}" data-elem="${c.element||''}" data-prof="${c.profession||''}" onclick="toggleChip(this)">${c.name}</div>`).join('')}
       </div>
     </div>
+    ${imgPickerHtml('pool','卡池封面','选填，不传则显示卡池名文字封面')}
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal()">取消</button>
       <button class="btn btn-gold" onclick="submitPoolEdit()">保存</button>
@@ -883,6 +941,7 @@ function modalAddCard(){
         <label><input type="radio" name="c_game" value="${id.game}" checked><span>${id.game}</span></label>
       </div>
     </div>
+    ${imgPickerHtml('card','密探图片','选填，建议竖版立绘（3:4），上传后自动压缩')}
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal()">取消</button>
       <button class="btn btn-gold" onclick="submitCard()">添加</button>
@@ -998,7 +1057,9 @@ function selectRecordCard(el){
   const name = el.dataset.name;
   const bar = document.getElementById('selected_card_bar');
   document.getElementById('sel_card_name').textContent = name;
-  document.getElementById('sel_card_initial').textContent = name.charAt(0);
+  const av = document.getElementById('sel_card_initial');
+  if(el.dataset.img){ av.innerHTML = `<img src="${el.dataset.img}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`; }
+  else { av.textContent = name.charAt(0); }
   const p = getPool(state.currentPoolId);
   const isUp = p.type==='UP' && (p.upCardIds||[]).includes(el.dataset.id);
   document.getElementById('sel_card_tag').textContent = isUp ? 'UP密探' : '歪出密探';
@@ -1127,7 +1188,7 @@ function submitPool(){
   const upCardIds = Array.from(document.querySelectorAll('#p_upcards .card-chip.selected')).map(c=>c.dataset.id);
   const game = getCurrentIdentity().game;
   const pools = getPools();
-  pools.push({ id:uid(), game, name, type, upCardIds, color:POOL_COLORS[pools.length%POOL_COLORS.length] });
+  pools.push({ id:uid(), game, name, type, upCardIds, img: tmpImgData['pool']||'', color:POOL_COLORS[pools.length%POOL_COLORS.length] });
   savePools(pools);
   closeModal(); toast('卡池添加成功');
 }
@@ -1189,6 +1250,36 @@ function delCard(cid){
   render(); toast('已删除');
 }
 function editPool(pid){ state.currentPoolId=pid; state.modal='editPool'; render(); }
+
+// ---- 密探编辑 ----
+function editCard(cid){ state.currentCardId=cid; state.modal='editCard'; render(); }
+function modalEditCard(){
+  const c = getCards().find(x=>x.id===state.currentCardId);
+  if(!c) return '<h3>密探不存在</h3>';
+  tmpImgData['card']=c.img||'';
+  return `
+    <h3>编辑密探</h3>
+    <div class="form-group"><label>密探名称</label><input id="c_name" value="${c.name}"></div>
+    <div class="form-group"><label>稀有度</label>
+      <div class="radio-group">
+        <label><input type="radio" name="c_rarity" value="绝密" ${c.rarity==='绝密'?'checked':''}><span>绝密</span></label>
+        <label><input type="radio" name="c_rarity" value="机密" ${c.rarity==='机密'?'checked':''}><span>机密</span></label>
+        <label><input type="radio" name="c_rarity" value="隐秘" ${c.rarity==='隐秘'?'checked':''}><span>隐秘</span></label>
+      </div>
+    </div>
+    ${imgPickerHtml('card','密探图片','选填，建议竖版立绘（3:4），上传后自动压缩')}
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">取消</button>
+      <button class="btn btn-gold" onclick="submitCardEdit()">保存</button>
+    </div>`;
+}
+function submitCardEdit(){
+  const name = document.getElementById('c_name').value.trim();
+  if(!name){ toast('请输入密探名称'); return; }
+  const rarity = document.querySelector('input[name=c_rarity]:checked').value;
+  saveCards(getCards().map(c=>c.id===state.currentCardId ? {...c, name, rarity, img: tmpImgData['card']||''} : c));
+  closeModal(); toast('保存成功');
+}
 
 // ==================== 导航 ====================
 function goIdentity(){ state.view='identity'; render(); }
