@@ -198,6 +198,45 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
 .pool-cover-img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block;}
 .rc-img{position:relative;}
 .rc-img img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block;}
+/* ===== 添加记录页 ===== */
+.addrec-page{padding:0 16px 24px;}
+.addrec-banner{position:relative;height:150px;border-radius:16px;overflow:hidden;background:#1C1C1E;margin-bottom:12px;display:flex;align-items:center;justify-content:center;}
+.addrec-banner-img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;}
+.addrec-banner-name{position:absolute;bottom:10px;left:12px;background:#C9A86A;color:#fff;font-size:15px;font-weight:700;padding:4px 14px;border-radius:14px;z-index:2;}
+.addrec-banner.noimg .addrec-banner-name{position:static;background:transparent;font-size:34px;font-weight:900;color:#fff;padding:0;text-align:center;line-height:1.2;}
+.addrec-banner-tag{position:absolute;top:10px;right:12px;background:rgba(0,0,0,0.55);color:#F0DCA0;font-size:12px;padding:4px 10px;border-radius:10px;z-index:2;}
+.addrec-panel{background:#F1E7D3;border-radius:14px;padding:14px;margin-bottom:14px;}
+.addrec-row{font-size:14px;color:#5a4520;margin-bottom:8px;}
+.addrec-row.pity{display:flex;justify-content:space-between;align-items:center;}
+.pity-num{background:#E5D5B5;border:1px solid #C9A86A;border-radius:8px;min-width:44px;text-align:center;font-weight:700;padding:3px 8px;color:#3a2e1a;}
+.addrec-hint{font-size:12px;color:#9A7B4F;margin:6px 0 10px;}
+.pend-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;}
+.pend-add{width:64px;height:96px;flex-shrink:0;border:1.5px dashed #C9A86A;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#C9A86A;font-size:28px;cursor:pointer;background:rgba(255,255,255,0.4);}
+.pend-card{width:64px;flex-shrink:0;position:relative;}
+.pend-img{width:64px;height:80px;border-radius:8px;overflow:hidden;background:linear-gradient(135deg,#d4c4a8,#b8a080);display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:700;position:relative;}
+.pend-img img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;}
+.pend-name{font-size:11px;text-align:center;color:#3a2e1a;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pend-pulls{font-size:11px;text-align:center;background:#E5D5B5;border-radius:6px;color:#5a4520;cursor:pointer;margin-top:2px;}
+.pend-del{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:#E74C3C;color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:3;}
+.addrec-bottom{background:#fff;border-radius:16px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,0.06);}
+.pick-btn{width:100%;padding:12px;border:1.5px solid #C9A86A;border-radius:12px;background:#FFFDF7;color:#B8860B;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:12px;}
+.pb-plus{font-size:18px;margin-right:6px;}
+.pulls-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;font-size:14px;color:#3a2e1a;}
+.pulls-row input{width:90px;padding:9px;border:1.5px solid #D4C4A8;border-radius:10px;font-size:14px;text-align:center;background:#FBF3E0;color:#3a2e1a;}
+.submit-big{width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,#B8860B,#8B6508);color:#fff;font-size:16px;font-weight:700;cursor:pointer;}
+/* ===== 密探列表页 ===== */
+.cp-page{padding:0 16px 24px;}
+.cp-search{width:100%;padding:10px 12px;border:1.5px solid #D4C4A8;border-radius:10px;font-size:14px;color:#3a2e1a;background:#fff;box-sizing:border-box;margin-bottom:10px;}
+.cp-filter-row{display:flex;gap:6px;overflow-x:auto;margin-bottom:8px;padding-bottom:2px;}
+.cp-section-title{font-size:14px;font-weight:700;color:#3a2e1a;margin:12px 2px 8px;}
+.cp-section-title.up{color:#B8860B;}
+.cp-grid{display:flex;flex-wrap:wrap;gap:8px;}
+.cp-card{width:calc(20% - 7px);position:relative;cursor:pointer;}
+.cp-img{position:relative;width:100%;padding-top:133%;border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#d4c4a8,#b8a080);border:2px solid #C9A86A;box-sizing:border-box;}
+.cp-img img,.cp-img span{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;font-weight:700;}
+.cp-card.up .cp-img{border-color:#E69138;box-shadow:0 0 6px rgba(230,145,56,0.5);}
+.cp-up-badge{position:absolute;top:4px;left:4px;background:#E69138;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;z-index:2;}
+.cp-name{background:#F5EFE2;border:1px solid #D4C4A8;border-radius:8px;font-size:11px;text-align:center;color:#3a2e1a;padding:3px 2px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 </style>
 </head>
 <body>
@@ -455,6 +494,8 @@ function render(){
   if(state.view==='overview') app.innerHTML = renderOverview();
   else if(state.view==='poolDetail') app.innerHTML = renderPoolDetail();
   else if(state.view==='manage') app.innerHTML = renderManage();
+  else if(state.view==='addRecord') app.innerHTML = renderAddRecord();
+  else if(state.view==='cardPicker') app.innerHTML = renderCardPicker();
   if(state.modal) renderModal();
 }
 
@@ -658,7 +699,7 @@ function renderPoolDetail(){
   }
 
   const cardsHtml = recs.map((r,j)=>renderRecordCard(r,j,recs.length,p.type==='UP')).join('');
-  const addCardHtml = editing ? `<div class="record-card add-card" onclick="openModal('addRecord')"><div class="plus">+</div></div>` : '';
+  const addCardHtml = editing ? `<div class="record-card add-card" onclick="goAddRecord()"><div class="plus">+</div></div>` : '';
 
   // 获取UP角色名称
   const upCardNames = p.upCardIds ? p.upCardIds.map(id=>{
@@ -705,7 +746,7 @@ function renderPoolDetail(){
         ${cardsHtml}
       </div>
     </div>
-    <button class="fab" onclick="openModal('addRecord')">+</button>`;
+    <button class="fab" onclick="goAddRecord()">+</button>`;
   }
 
   // 编辑模式
@@ -945,6 +986,27 @@ function modalAddCard(){
         <label><input type="radio" name="c_rarity" value="绝密" checked><span>绝密</span></label>
         <label><input type="radio" name="c_rarity" value="机密"><span>机密</span></label>
         <label><input type="radio" name="c_rarity" value="隐秘"><span>隐秘</span></label>
+      </div>
+    </div>
+    <div class="form-group"><label>属性（选填，用于密探列表筛选）</label>
+      <div class="radio-group">
+        <label><input type="radio" name="c_elem" value="" checked><span>无</span></label>
+        <label><input type="radio" name="c_elem" value="火"><span>火</span></label>
+        <label><input type="radio" name="c_elem" value="地"><span>地</span></label>
+        <label><input type="radio" name="c_elem" value="风"><span>风</span></label>
+        <label><input type="radio" name="c_elem" value="水"><span>水</span></label>
+        <label><input type="radio" name="c_elem" value="阳"><span>阳</span></label>
+        <label><input type="radio" name="c_elem" value="阴"><span>阴</span></label>
+      </div>
+    </div>
+    <div class="form-group"><label>职业（选填，用于密探列表筛选）</label>
+      <div class="radio-group">
+        <label><input type="radio" name="c_prof" value="" checked><span>无</span></label>
+        <label><input type="radio" name="c_prof" value="破军"><span>破军</span></label>
+        <label><input type="radio" name="c_prof" value="龙盾"><span>龙盾</span></label>
+        <label><input type="radio" name="c_prof" value="岐黄"><span>岐黄</span></label>
+        <label><input type="radio" name="c_prof" value="神纪"><span>神纪</span></label>
+        <label><input type="radio" name="c_prof" value="诡道"><span>诡道</span></label>
       </div>
     </div>
     <div class="form-group"><label>所属游戏</label>
@@ -1219,8 +1281,10 @@ function submitCard(){
   if(!name){ toast('请输入密探名称'); return; }
   const rarity = document.querySelector('input[name=c_rarity]:checked').value;
   const game = document.querySelector('input[name=c_game]:checked').value;
+  const element = (document.querySelector('input[name=c_elem]:checked')||{}).value || '';
+  const profession = (document.querySelector('input[name=c_prof]:checked')||{}).value || '';
   const cards = getCards();
-  cards.push({ id:uid(), name, rarity, game });
+  cards.push({ id:uid(), name, rarity, game, element, profession, img: tmpImgData['card']||'' });
   saveCards(cards);
   closeModal(); toast('密探添加成功');
 }
@@ -1241,6 +1305,175 @@ function submitRecord(){
     pulls, gotTop, topCardName, topIsUp, isPity, isGuarantee });
   saveRecords(recs);
   closeModal(); toast('记录已保存');
+}
+
+// ==================== 添加记录页 ====================
+function goAddRecord(){
+  state.pendingRecs = [];
+  state.addPulls = 1;
+  state.view = 'addRecord';
+  render();
+}
+function backToPoolDetail(){ state.view='poolDetail'; render(); }
+function syncAddPulls(){
+  const inp = document.getElementById('add_pulls_input');
+  if(inp) state.addPulls = Math.max(1, parseInt(inp.value)||1);
+}
+function renderAddRecord(){
+  const p = getPool(state.currentPoolId);
+  if(!p){ state.view='overview'; return renderOverview(); }
+  const pity = getPoolPity(p.id);
+  const cards = getCards();
+  const upNames = (p.upCardIds||[]).map(id=>{ const c=cards.find(x=>x.id===id); return c?c.name:''; }).filter(n=>n);
+  const isUp = p.type==='UP';
+  const pend = state.pendingRecs||[];
+  const slots = pend.map((r,i)=>`
+    <div class="pend-card">
+      <div class="pend-del" onclick="removePending(${i})">×</div>
+      <div class="pend-img">${r.img?`<img src="${r.img}">`:r.name.charAt(0)}</div>
+      <div class="pend-name">${r.name}</div>
+      <div class="pend-pulls" onclick="editPendingPulls(${i})">${r.pulls}抽</div>
+    </div>`).join('');
+  return `
+  ${renderHeader()}
+  <div class="sub-bar">
+    <span class="back-btn" onclick="backToPoolDetail()">‹ 返回</span>
+    <span class="sub-title">招募记录</span>
+  </div>
+  <div class="addrec-page">
+    <div class="addrec-banner ${p.img?'':'noimg'}">
+      ${p.img?`<img class="addrec-banner-img" src="${p.img}">`:''}
+      <div class="addrec-banner-name">${p.name}</div>
+      ${isUp?'<div class="addrec-banner-tag">【绝密·密探】限时概率提升</div>':''}
+    </div>
+    <div class="addrec-panel">
+      <div class="addrec-row">up角色：${isUp&&upNames.length?upNames.join('；'):'无'}</div>
+      <div class="addrec-row pity">
+        <span>距离下次保底还需多少次招募</span>
+        <span class="pity-num">${pity.remaining}</span>
+      </div>
+      <div class="addrec-hint">请按照抽出的顺序提交绝密密探数据</div>
+      <div class="pend-row">
+        <div class="pend-add" onclick="goCardPicker()">+</div>
+        ${slots}
+      </div>
+    </div>
+    <div class="addrec-bottom">
+      <button class="pick-btn" onclick="goCardPicker()"><span class="pb-plus">+</span>选择密探</button>
+      <div class="pulls-row">
+        <label>招募次数</label>
+        <input id="add_pulls_input" type="number" min="1" value="${state.addPulls||1}" onchange="syncAddPulls()">
+      </div>
+      <button class="submit-big" onclick="submitPendingRecs()">确认提交</button>
+    </div>
+  </div>`;
+}
+
+// ==================== 密探列表页 ====================
+function goCardPicker(){
+  syncAddPulls();
+  state.cpElem='all'; state.cpProf='all'; state.cpSearch='';
+  state.view='cardPicker';
+  render();
+}
+function backToAddRecord(){ state.view='addRecord'; render(); }
+function cpSetElem(v){ state.cpElem=v; render(); }
+function cpSetProf(v){ state.cpProf=v; render(); }
+function cpSearch(v){
+  state.cpSearch=v.trim();
+  const pos=v.length;
+  render();
+  const inp=document.querySelector('.cp-search');
+  if(inp){ inp.focus(); try{ inp.setSelectionRange(pos,pos); }catch(e){} }
+}
+function renderCardPicker(){
+  const p = getPool(state.currentPoolId);
+  const id = getCurrentIdentity();
+  const all = getCards().filter(c=>c.game===id.game && c.rarity==='绝密');
+  const upIds = (p && p.type==='UP') ? (p.upCardIds||[]) : [];
+  const match = c=>{
+    if(state.cpElem!=='all' && (c.element||'')!==state.cpElem) return false;
+    if(state.cpProf!=='all' && (c.profession||'')!==state.cpProf) return false;
+    if(state.cpSearch && c.name.indexOf(state.cpSearch)<0) return false;
+    return true;
+  };
+  const upCards = all.filter(c=>upIds.includes(c.id) && match(c));
+  const otherCards = all.filter(c=>!upIds.includes(c.id) && match(c));
+  const cardHtml = (c,isUpCard)=>`
+    <div class="cp-card ${isUpCard?'up':''}" onclick="selectPickerCard('${c.id}')">
+      ${isUpCard?'<div class="cp-up-badge">UP</div>':''}
+      <div class="cp-img">${c.img?`<img src="${c.img}">`:`<span>${c.name.charAt(0)}</span>`}</div>
+      <div class="cp-name">${c.name}</div>
+    </div>`;
+  const elems = ['火','地','风','水','阳','阴'];
+  const profs = ['破军','龙盾','岐黄','神纪','诡道'];
+  return `
+  ${renderHeader()}
+  <div class="sub-bar">
+    <span class="back-btn" onclick="backToAddRecord()">‹ 返回</span>
+    <span class="sub-title">密探列表</span>
+  </div>
+  <div class="cp-page">
+    <input class="cp-search" type="text" placeholder="搜索密探名字…" value="${state.cpSearch||''}" oninput="cpSearch(this.value)">
+    <div class="cp-filter-row">
+      <span class="filter-chip ${state.cpElem==='all'?'active':''}" onclick="cpSetElem('all')">全部</span>
+      ${elems.map(e=>`<span class="filter-chip ${state.cpElem===e?'active':''}" onclick="cpSetElem('${e}')">${e}</span>`).join('')}
+    </div>
+    <div class="cp-filter-row">
+      <span class="filter-chip ${state.cpProf==='all'?'active':''}" onclick="cpSetProf('all')">全部</span>
+      ${profs.map(x=>`<span class="filter-chip ${state.cpProf===x?'active':''}" onclick="cpSetProf('${x}')">${x}</span>`).join('')}
+    </div>
+    ${upCards.length?`<div class="cp-section-title up">当期概率提升</div><div class="cp-grid">${upCards.map(c=>cardHtml(c,true)).join('')}</div>`:''}
+    <div class="cp-section-title">${upIds.length?'其他密探':'全部密探'}（${otherCards.length}）</div>
+    ${otherCards.length?`<div class="cp-grid">${otherCards.map(c=>cardHtml(c,false)).join('')}</div>`:''}
+    ${all.length===0?'<div class="empty" style="padding:20px;">还没有绝密密探，请先在管理页添加</div>':(all.length>0 && upCards.length+otherCards.length===0?'<div class="empty" style="padding:20px;">没有符合条件的密探</div>':'')}
+  </div>`;
+}
+function selectPickerCard(cid){
+  const c = getCards().find(x=>x.id===cid);
+  if(!c) return;
+  syncAddPulls();
+  if(!state.pendingRecs) state.pendingRecs=[];
+  state.pendingRecs.push({ cardId:c.id, name:c.name, img:c.img||'', pulls: state.addPulls||1 });
+  state.view='addRecord';
+  render();
+  toast('已添加 '+c.name+'（'+(state.addPulls||1)+'抽）');
+}
+function removePending(i){ state.pendingRecs.splice(i,1); render(); }
+function editPendingPulls(i){
+  const cur = state.pendingRecs[i].pulls;
+  const v = prompt('这条记录的招募次数', cur);
+  if(v===null) return;
+  const n = parseInt(v);
+  if(!n || n<1){ toast('请输入有效次数'); return; }
+  state.pendingRecs[i].pulls = n;
+  render();
+}
+function submitPendingRecs(){
+  syncAddPulls();
+  const pend = state.pendingRecs||[];
+  if(pend.length===0){ toast('请先选择密探'); return; }
+  const p = getPool(state.currentPoolId);
+  if(!p){ state.view='overview'; return render(); }
+  for(let i=0;i<pend.length;i++){
+    if(!pend[i].pulls || pend[i].pulls<1){ toast('第'+(i+1)+'条记录的招募次数无效'); return; }
+  }
+  const base = Date.now();
+  for(let i=0;i<pend.length;i++){
+    const r = pend[i];
+    const topIsUp = p.type==='UP' ? (p.upCardIds||[]).includes(r.cardId) : null;
+    const { isPity, isGuarantee } = calcPityFlags(p.id, r.pulls, true, topIsUp);
+    const recs = getRecords();
+    recs.push({ id:uid(), identityId:state.currentIdentityId, poolId:p.id, time:new Date(base+i*1000).toISOString(),
+      pulls:r.pulls, gotTop:true, topCardName:r.name, topIsUp, isPity, isGuarantee });
+    saveRecords(recs);
+  }
+  const n = pend.length;
+  state.pendingRecs=[];
+  state.view='poolDetail';
+  state.editingPool=false;
+  toast('已保存 '+n+' 条记录');
+  render();
 }
 
 // ==================== 删除 ====================
@@ -1278,6 +1511,18 @@ function modalEditCard(){
         <label><input type="radio" name="c_rarity" value="隐秘" ${c.rarity==='隐秘'?'checked':''}><span>隐秘</span></label>
       </div>
     </div>
+    <div class="form-group"><label>属性（选填，用于密探列表筛选）</label>
+      <div class="radio-group">
+        <label><input type="radio" name="c_elem" value="" ${!c.element?'checked':''}><span>无</span></label>
+        ${['火','地','风','水','阳','阴'].map(e=>`<label><input type="radio" name="c_elem" value="${e}" ${c.element===e?'checked':''}><span>${e}</span></label>`).join('')}
+      </div>
+    </div>
+    <div class="form-group"><label>职业（选填，用于密探列表筛选）</label>
+      <div class="radio-group">
+        <label><input type="radio" name="c_prof" value="" ${!c.profession?'checked':''}><span>无</span></label>
+        ${['破军','龙盾','岐黄','神纪','诡道'].map(x=>`<label><input type="radio" name="c_prof" value="${x}" ${c.profession===x?'checked':''}><span>${x}</span></label>`).join('')}
+      </div>
+    </div>
     ${imgPickerHtml('card','密探图片','选填，建议竖版立绘（3:4），上传后自动压缩')}
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal()">取消</button>
@@ -1288,7 +1533,9 @@ function submitCardEdit(){
   const name = document.getElementById('c_name').value.trim();
   if(!name){ toast('请输入密探名称'); return; }
   const rarity = document.querySelector('input[name=c_rarity]:checked').value;
-  saveCards(getCards().map(c=>c.id===state.currentCardId ? {...c, name, rarity, img: tmpImgData['card']||''} : c));
+  const element = (document.querySelector('input[name=c_elem]:checked')||{}).value || '';
+  const profession = (document.querySelector('input[name=c_prof]:checked')||{}).value || '';
+  saveCards(getCards().map(c=>c.id===state.currentCardId ? {...c, name, rarity, element, profession, img: tmpImgData['card']||''} : c));
   closeModal(); toast('保存成功');
 }
 
