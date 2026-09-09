@@ -1287,6 +1287,7 @@ function submitPoolEdit(){
   p.name = document.getElementById('p_name').value.trim();
   p.type = document.querySelector('input[name=p_type]:checked').value;
   p.upCardIds = Array.from(document.querySelectorAll('#p_upcards .card-chip.selected')).map(c=>c.dataset.id);
+  p.img = tmpImgData['pool']||'';
   const pools = getPools().map(x=>x.id===p.id?p:x);
   savePools(pools);
   closeModal(); toast('保存成功');
