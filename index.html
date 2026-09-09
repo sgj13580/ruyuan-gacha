@@ -200,14 +200,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
 .rc-img img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block;}
 /* ===== 添加记录页 ===== */
 .addrec-page{padding:0 16px 24px;}
-.addrec-banner{position:relative;height:150px;border-radius:16px;overflow:hidden;background:#1C1C1E;margin-bottom:12px;display:flex;align-items:center;justify-content:center;}
+.addrec-banner{position:relative;width:100%;height:0;padding-top:28.57%;border-radius:16px;overflow:hidden;background:#1C1C1E;margin-bottom:12px;}
 .addrec-banner-img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;}
 .addrec-banner-name{position:absolute;bottom:10px;left:12px;background:#C9A86A;color:#fff;font-size:15px;font-weight:700;padding:4px 14px;border-radius:14px;z-index:2;}
-.addrec-banner.noimg .addrec-banner-name{position:static;background:transparent;font-size:34px;font-weight:900;color:#fff;padding:0;text-align:center;line-height:1.2;}
+.addrec-banner.noimg .addrec-banner-name{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:transparent;font-size:34px;font-weight:900;color:#fff;padding:0;text-align:center;line-height:1.2;}
 .addrec-banner-tag{position:absolute;top:10px;right:12px;background:rgba(0,0,0,0.55);color:#F0DCA0;font-size:12px;padding:4px 10px;border-radius:10px;z-index:2;}
 .addrec-panel{background:#F1E7D3;border-radius:14px;padding:14px;margin-bottom:14px;}
 .addrec-row{font-size:14px;color:#5a4520;margin-bottom:8px;}
 .addrec-row.pity{display:flex;justify-content:space-between;align-items:center;}
+.addrec-row.stat{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.addrec-row.stat b{color:#B8860B;font-size:16px;}
 .pity-num{background:#E5D5B5;border:1px solid #C9A86A;border-radius:8px;min-width:44px;text-align:center;font-weight:700;padding:3px 8px;color:#3a2e1a;}
 .addrec-hint{font-size:12px;color:#9A7B4F;margin:6px 0 10px;}
 .pend-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;}
@@ -240,7 +242,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
 .elem-icon-btn{width:40px;height:40px;border-radius:50%;flex-shrink:0;cursor:pointer;border:2px solid transparent;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.08);padding:2px;box-sizing:border-box;}
 .elem-icon-btn img{width:100%;height:100%;object-fit:contain;}
 .elem-icon-btn.active{border-color:#B8860B;box-shadow:0 0 6px rgba(184,134,11,0.55);}
-.cp-elem{position:absolute;top:3px;right:3px;width:22px;height:22px;z-index:2;pointer-events:none;}
+.cp-elem{position:absolute;top:-7px;right:-7px;width:26px;height:26px;z-index:3;pointer-events:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.35));}
 .cp-elem img{width:100%;height:100%;object-fit:contain;}
 .radio-elem-icon{width:18px;height:18px;vertical-align:middle;margin-right:3px;object-fit:contain;}
 </style>
@@ -329,7 +331,9 @@ function compressImage(file, key, maxW){
       c.width = Math.max(1, Math.round(img.width*scale));
       c.height = Math.max(1, Math.round(img.height*scale));
       c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-      tmpImgData[key] = c.toDataURL('image/jpeg', 0.82);
+      const out = c.toDataURL('image/jpeg', 0.82);
+      if(!out || out.length<1000 || out.indexOf('data:image')!==0) throw new Error('压缩结果无效');
+      tmpImgData[key] = out;
       URL.revokeObjectURL(objUrl);
       updateImgPreview(key);
     }catch(e){
@@ -653,7 +657,7 @@ function renderPoolCard(p){
   return `
   <div class="pool-card ${isExpanded?'expanded':''}" onclick="togglePoolExpand('${p.id}')">
     <div class="pc-row">
-      ${p.img ? `<div class="pc-cover" style="width:130px;min-height:160px;padding:0;"><img class="pool-cover-img" src="${p.img}"><div class="pc-name">${p.name}</div></div>` : `
+      ${p.img ? `<div class="pc-cover" style="width:150px;min-height:120px;padding:0;"><img class="pool-cover-img" src="${p.img}"><div class="pc-name">${p.name}</div></div>` : `
       <div class="pc-cover" style="background:#1C1C1E;width:110px;display:flex;align-items:center;justify-content:center;padding:8px;">
         <div class="pc-name" style="background:transparent;color:#fff;font-size:40px;font-weight:900;padding:0;position:static;max-width:none;text-align:center;line-height:1.15;word-break:break-all;white-space:normal;overflow:visible;text-overflow:clip;">${p.name}</div>
       </div>`}
@@ -725,18 +729,18 @@ function renderPoolDetail(){
       <span class="sub-title">${p.name}</span>
     </div>
     <div class="pool-detail">
-      <div class="pool-header">
-        ${p.img ? `<div class="ph-cover" style="width:140px;min-height:175px;padding:0;"><img class="pool-cover-img" src="${p.img}"><div class="ph-name">${p.name}</div></div>` : `
-        <div class="ph-cover" style="background:#1C1C1E;width:120px;display:flex;align-items:center;justify-content:center;padding:10px;">
-          <div class="ph-name" style="position:static;background:transparent;color:#fff;font-size:42px;font-weight:900;padding:0;max-width:none;text-align:center;line-height:1.15;word-break:break-all;white-space:normal;overflow:visible;">${p.name}</div>
-        </div>`}
-        <div class="ph-stats">
-          <div class="ph-stat"><span class="ph-label">总次数</span><span class="ph-val">${st.pulls}</span></div>
-          <div class="ph-stat"><span class="ph-label">总绝密数</span><span class="ph-val">${st.top}</span></div>
-          <div class="ph-stat"><span class="ph-label">平均出绝密次数</span><span class="ph-val">${st.avg}</span></div>
-          ${p.type==='UP'?`<div class="ph-stat"><span class="ph-label">小保底不歪比例</span><span class="ph-val">${st.notLostRate}</span></div>`:''}
-        </div>
-        <div class="ph-edit" onclick="startEditPool()">编辑</div>
+      <div class="addrec-banner ${p.img?'':'noimg'}">
+        ${p.img?`<img class="addrec-banner-img" src="${p.img}">`:''}
+        <div class="addrec-banner-name">${p.name}</div>
+        ${p.type==='UP'?'<div class="addrec-banner-tag">【绝密·密探】限时概率提升</div>':''}
+      </div>
+      <div class="addrec-panel">
+        <div class="addrec-row">up角色：${p.type==='UP'&&upCardNames?upCardNames:'无'}</div>
+        <div class="addrec-row stat"><span>总次数</span><b>${st.pulls}</b></div>
+        <div class="addrec-row stat"><span>总绝密数</span><b>${st.top}</b></div>
+        <div class="addrec-row stat"><span>平均出绝密次数</span><b>${st.avg}</b></div>
+        ${p.type==='UP'?`<div class="addrec-row stat"><span>小保底不歪比例</span><b>${st.notLostRate}</b></div>`:''}
+        <div style="text-align:right;margin-top:6px;"><span style="color:#B8860B;font-size:14px;font-weight:600;cursor:pointer;" onclick="startEditPool()">编辑 ›</span></div>
       </div>
 
       <div class="pity-box">
@@ -761,16 +765,21 @@ function renderPoolDetail(){
   ${renderHeader()}
   <div class="sub-bar">
     <span class="back-btn" onclick="goOverview()">‹ 返回</span>
-    <span class="sub-title">${p.name}</span>
+    <span class="sub-title">卡池编辑</span>
   </div>
   <div class="pool-detail">
-    ${p.type==='UP' && upCardNames ? `<div style="background:#fff;border-radius:12px;padding:14px 16px;margin-bottom:12px;font-size:15px;color:#3a2e1a;"><span style="color:#9A7B4F;">本期up角色：</span>${upCardNames}</div>` : ''}
-
-    <div class="edit-input-row">
-      <label>距离下次保底还需多少次招募</label>
-      <input type="number" id="edit_pity_input" value="${state.editPity}" min="0" max="40" onchange="state.editPity=parseInt(this.value)||0">
+    <div class="addrec-banner ${p.img?'':'noimg'}">
+      ${p.img?`<img class="addrec-banner-img" src="${p.img}">`:''}
+      <div class="addrec-banner-name">${p.name}</div>
     </div>
-
+    <div class="addrec-panel">
+      <div class="addrec-row">${p.type==='UP'&&upCardNames?`up角色：${upCardNames}`:'up角色：无'}</div>
+      <div class="addrec-row pity" style="margin-bottom:0;">
+        <span>距离下次保底还需多少次招募</span>
+        <input type="number" id="edit_pity_input" value="${state.editPity}" min="0" max="40" onchange="state.editPity=parseInt(this.value)||0" style="width:70px;padding:6px;border:1px solid #C9A86A;border-radius:8px;text-align:center;background:#FFFDF7;color:#3a2e1a;font-size:15px;font-weight:700;">
+      </div>
+    </div>
+    <div class="addrec-hint" style="margin:0 2px 8px;">请按照抽出的顺序提交绝密密探数据</div>
     ${recs.length===0?'<div class="empty">还没有记录，点击 + 添加</div>':''}
     <div class="record-cards">
       ${addCardHtml}
@@ -1409,7 +1418,8 @@ function renderCardPicker(){
   const cardHtml = (c,isUpCard)=>`
     <div class="cp-card ${isUpCard?'up':''}" onclick="selectPickerCard('${c.id}')">
       ${isUpCard?'<div class="cp-up-badge">UP</div>':''}
-      <div class="cp-img">${(c.element&&ELEM_ICONS[c.element])?`<div class="cp-elem"><img src="${ELEM_ICONS[c.element]}"></div>`:''}${c.img?`<img src="${c.img}">`:`<span>${c.name.charAt(0)}</span>`}</div>
+      <div class="cp-img">${c.img?`<img src="${c.img}">`:`<span>${c.name.charAt(0)}</span>`}</div>
+      ${(c.element&&ELEM_ICONS[c.element])?`<div class="cp-elem"><img src="${ELEM_ICONS[c.element]}"></div>`:''}
       <div class="cp-name">${c.name}</div>
     </div>`;
   const elems = ['火','地','风','水','阳','阴'];
